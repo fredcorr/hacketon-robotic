@@ -10,8 +10,17 @@ to run on the real hardware without changing anything else.
 
 import os
 import sys
+<<<<<<< HEAD
 import ssl
 import certifi
+=======
+<<<<<<< Updated upstream
+=======
+import ssl
+import certifi
+import time
+>>>>>>> Stashed changes
+>>>>>>> 2a0c334 (fix: arnm issue)
 
 # python-dotenv loads the variables from your .env file into os.environ
 # so the rest of the code can read them with os.environ.get(...)
@@ -79,11 +88,22 @@ def setup_arm():
 
 def run_test_motion(arm) -> None:
     """
-    Move one joint to confirm the connection is working.
-    This is the function you will replace / extend with your AI decision loop.
+    Move one joint to confirm the connection is working, then hold the position.
+    Without continuously re-sending the target, physics simulation will pull the arm down.
+    Press Ctrl+C to stop.
     """
-    print("\nRunning test motion...")
+    # The target pose: all joints at 0 (upright), except _1 rotated to 0.5 rad.
+    # Add more joints here to hold a more complex pose.
+    target_pose = {
+        "_1": 0.5,
+        "_2": 0.0,
+        "_3": 0.0,
+        "_4": 0.0,
+        "_5": 0.0,
+        "_6": 0.0,
+    }
 
+<<<<<<< Updated upstream
     # set_joints() sends a position command to one or more joints.
     # - The key is the joint name (a string matching what the SDK expects).
     # - The value is the target angle in radians (0.5 rad ≈ 29°).
@@ -92,6 +112,19 @@ def run_test_motion(arm) -> None:
 
     print("  Joint '_1' moved to 0.5 rad — test motion complete.")
     print("\nAll good! The simulation is responding to commands.")
+=======
+    print("\nMoving to target pose and holding...")
+    print("Press Ctrl+C to stop.\n")
+
+    try:
+        while True:
+            # Re-send the target every 0.1 seconds (10 Hz).
+            # This keeps the simulation's physics from pulling the arm down.
+            arm.set_joints(target_pose)
+            time.sleep(0.1)
+    except KeyboardInterrupt:
+        print("\nStopped holding. Arm will now be released by physics.")
+>>>>>>> Stashed changes
 
 
 # ── 4. Main entry point ───────────────────────────────────────────────────────
