@@ -13,6 +13,7 @@ import sys
 import ssl
 import certifi
 import time
+import math
 
 # python-dotenv loads the variables from your .env file into os.environ
 # so the rest of the code can read them with os.environ.get(...)
@@ -78,34 +79,44 @@ def setup_arm():
 
 # ── 3. Actions — everything that moves the arm goes here ─────────────────────
 
-def run_test_motion(arm) -> None:
+def wave(arm) -> None:
     """
-    Move one joint to confirm the connection is working, then hold the position.
-    Without continuously re-sending the target, physics simulation will pull the arm down.
-    Press Ctrl+C to stop.
-    """
-    # The target pose: all joints at 0 (upright), except _1 rotated to 0.5 rad.
-    # Add more joints here to hold a more complex pose.
-    target_pose = {
-        "_1": 0.5,
-        "_2": 0.0,
-        "_3": 0.0,
-        "_4": 0.0,
-        "_5": 0.0,
-        "_6": 0.0,
-    }
+    Wave the arm like a human greeting wave.
 
-    print("\nMoving to target pose and holding...")
-    print("Press Ctrl+C to stop.\n")
+    Joint map (from the SO101 universal schema):
+      _1  base rotation      left/right spin     limits: ±1.92 rad
+      _2  shoulder pitch     forward/back tilt   limits: ±1.74 rad
+      _3  elbow              upper arm bend       limits: -1.74 to +1.57 rad
+      _4  wrist pitch        wrist up/down        limits: ±1.66 rad
+      _5  wrist roll         wrist rotation       limits: ±2.79 rad
+      _6  gripper jaw        open/close           limits: -0.17 to +1.74 rad
+
+    Wave motion: raise the shoulder (_2), bend the elbow (_3),
+    then rock the wrist (_4) back and forth.
+    """
+    speed = 3.0   # how fast the wrist rocks (rad/s). increase to wave faster.
+
+    print("\nWaving... Press Ctrl+C to stop.\n")
 
     try:
         while True:
-            # Re-send the target every 0.1 seconds (10 Hz).
-            # This keeps the simulation's physics from pulling the arm down.
-            arm.set_joints(target_pose)
-            time.sleep(0.1)
+            t = time.time()
+
+            # Wrist rocks back and forth — this is the main wave motion
+            wrist_rock = math.sin(t * speed) * 0.6   # ±0.6 rad ≈ ±34°
+
+            arm.set_joints({
+                "_1":  0.0,           # base centered
+                "_2":  1.0,           # shoulder raised (~57°)
+                "_3": -1.0,           # elbow bent so hand is up
+                "_4":  wrist_rock,    # wrist rocks back and forth — the "wave"
+                "_5":  0.0,           # wrist roll neutral
+                "_6":  0.5,           # gripper slightly open
+            })
+
+            time.sleep(0.02)   # 50 Hz
     except KeyboardInterrupt:
-        print("\nStopped holding. Arm will now be released by physics.")
+        print("\nWave stopped.")
 
 
 # ── 4. Main entry point ───────────────────────────────────────────────────────
@@ -117,9 +128,4 @@ if __name__ == "__main__":
     arm = setup_arm()
 
     # --- Perception → Decision → Action loop (add your AI here) ---
-    # Later: replace run_test_motion with something like:
-    #   observation = perceive(arm)
-    #   action      = decide(observation)
-    #   act(arm, action)
-
-    run_test_motion(arm)
+    wave(arm)
