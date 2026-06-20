@@ -154,3 +154,13 @@ macOS restricts scripts run from `~/Documents` and `~/Desktop` when Terminal doe
 
 - **Move the project** to your home folder (`~/hacketon-robotic`) where Terminal always has access.
 - **Or grant Terminal access:** System Settings → Privacy & Security → Full Disk Access → enable Terminal.
+
+### SSL error: `certificate verify failed: unable to get local issuer certificate`
+
+Python 3.x installed from python.org on macOS doesn't link the system certificate store by default, so HTTPS requests fail. The project code already works around this automatically via `certifi`, but if you hit this error elsewhere, run the one-time fix that ships with Python:
+
+```bash
+open "/Applications/Python 3.14/Install Certificates.command"
+```
+
+A Terminal window opens, runs, and closes on its own. After that, all Python HTTPS requests on your machine work without any code changes.

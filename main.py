@@ -10,11 +10,21 @@ to run on the real hardware without changing anything else.
 
 import os
 import sys
+import ssl
+import certifi
 
 # python-dotenv loads the variables from your .env file into os.environ
 # so the rest of the code can read them with os.environ.get(...)
 from dotenv import load_dotenv
 load_dotenv()
+
+# macOS Python 3.x doesn't link the system certificate store by default,
+# so HTTPS requests fail with "certificate verify failed".
+# certifi ships a trusted CA bundle; pointing these env vars at it
+# fixes SSL for the Cyberwave SDK (and any other HTTPS library) without
+# needing to touch system files.
+os.environ.setdefault("SSL_CERT_FILE", certifi.where())
+os.environ.setdefault("REQUESTS_CA_BUNDLE", certifi.where())
 
 from cyberwave import Cyberwave
 
@@ -78,9 +88,9 @@ def run_test_motion(arm) -> None:
     # - The key is the joint name (a string matching what the SDK expects).
     # - The value is the target angle in radians (0.5 rad ≈ 29°).
     # - degrees=False is the default; pass degrees=True to use degrees instead.
-    arm.set_joints({"Rotation": 0.5})
+    arm.set_joints({"_1": 0.5})
 
-    print("  Joint 'Rotation' moved to 0.5 rad — test motion complete.")
+    print("  Joint '_1' moved to 0.5 rad — test motion complete.")
     print("\nAll good! The simulation is responding to commands.")
 
 
