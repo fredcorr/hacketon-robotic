@@ -10,17 +10,9 @@ to run on the real hardware without changing anything else.
 
 import os
 import sys
-<<<<<<< HEAD
-import ssl
-import certifi
-=======
-<<<<<<< Updated upstream
-=======
 import ssl
 import certifi
 import time
->>>>>>> Stashed changes
->>>>>>> 2a0c334 (fix: arnm issue)
 
 # python-dotenv loads the variables from your .env file into os.environ
 # so the rest of the code can read them with os.environ.get(...)
@@ -103,16 +95,6 @@ def run_test_motion(arm) -> None:
         "_6": 0.0,
     }
 
-<<<<<<< Updated upstream
-    # set_joints() sends a position command to one or more joints.
-    # - The key is the joint name (a string matching what the SDK expects).
-    # - The value is the target angle in radians (0.5 rad ≈ 29°).
-    # - degrees=False is the default; pass degrees=True to use degrees instead.
-    arm.set_joints({"_1": 0.5})
-
-    print("  Joint '_1' moved to 0.5 rad — test motion complete.")
-    print("\nAll good! The simulation is responding to commands.")
-=======
     print("\nMoving to target pose and holding...")
     print("Press Ctrl+C to stop.\n")
 
@@ -124,7 +106,6 @@ def run_test_motion(arm) -> None:
             time.sleep(0.1)
     except KeyboardInterrupt:
         print("\nStopped holding. Arm will now be released by physics.")
->>>>>>> Stashed changes
 
 
 # ── 4. Main entry point ───────────────────────────────────────────────────────
